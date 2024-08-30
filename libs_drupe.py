@@ -8,6 +8,15 @@ from send2trash import send2trash
 from datetime import datetime, timezone
 from configobj import ConfigObj
 
+import platform
+import configparser
+
+configParser = configparser.RawConfigParser()
+configFilePath = r'config.txt'
+configParser.read(configFilePath)
+
+FOLDER_NAME = configParser.get('options', 'FOLDER_NAME', fallback='drupebox_' + platform.node())
+print(f'Will sync local folder to remote: {FOLDER_NAME}')
 
 """
 Variables in the following fomrats
