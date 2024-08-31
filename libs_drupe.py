@@ -21,7 +21,7 @@ APP_ID = configParser.getint('options', 'APP_ID', fallback=0)
 if APP_ID == 0:
     APP_NAME = "drupebox"
 elif APP_ID == 1:
-    APP_NAME = "JhouLabMouseVideo"
+    APP_NAME = "drupebox_JhouLabMouseVideo"
 elif APP_ID == 2:
     APP_NAME = "drupebox_Home"
 else:
