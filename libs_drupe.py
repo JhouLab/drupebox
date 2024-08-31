@@ -27,7 +27,7 @@ elif APP_ID == 2:
 else:
     APP_NAME = "default"
 
-print(f'Will sync local folder to remote: {APP_NAME}')
+print(f'Will sync local folder to remote Dropbox App: {APP_NAME}')
 
 
 
