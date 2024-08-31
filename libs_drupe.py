@@ -8,15 +8,28 @@ from send2trash import send2trash
 from datetime import datetime, timezone
 from configobj import ConfigObj
 
-import platform
 import configparser
 
 configParser = configparser.RawConfigParser()
 configFilePath = r'config.txt'
 configParser.read(configFilePath)
 
-FOLDER_NAME = configParser.get('options', 'FOLDER_NAME', fallback='drupebox_' + platform.node())
-print(f'Will sync local folder to remote: {FOLDER_NAME}')
+APP_ID = configParser.getint('options', 'APP_ID', fallback=0)
+
+# App name must be created within Dropbox. Go to: dropbox.com/developers, and follow the directions to create app.
+#
+if APP_ID == 0:
+    APP_NAME = "drupebox"
+elif APP_ID == 1:
+    APP_NAME = "JhouLabMouseVideo"
+elif APP_ID == 2:
+    APP_NAME = "drupebox_Home"
+else:
+    APP_NAME = "default"
+
+print(f'Will sync local folder to remote: {APP_NAME}')
+
+
 
 """
 Variables in the following fomrats
@@ -93,10 +106,24 @@ def get_containing_folder_path(file_path):
     return path_join(*tuple(file_path.rstrip("/").split("/")[0:-1]))
 
 
+def requestNewAuthorization(config):
+    flow = dropbox.DropboxOAuth2FlowNoRedirect(
+        config["app_key"], use_pkce=True, token_access_type="offline"
+    )
+    authorize_url = flow.start()
+    print(("1. Go to: " + authorize_url))
+    print('2. Click "Allow" (you might have to log in first)')
+    print("3. Copy the authorization code.")
+    code = input("Enter the authorization code here: ").strip()
+    result = flow.finish(code)
+
+    config["refresh_token"] = result.refresh_token
+
+
 def get_config_real():
     if not path_exists(path_join(home, ".config")):
         os.makedirs(path_join(home, ".config"))
-    config_filename = path_join(home, ".config", "drupebox")
+    config_filename = path_join(home, ".config", APP_NAME)
     if not path_exists(config_filename):
         # First time only
         config = ConfigObj()
@@ -104,19 +131,13 @@ def get_config_real():
 
         # To customise this code, change the app key below
         # Get your app key from the Dropbox developer website for your app
-        config["app_key"] = "1skff241na3x0at"
+        if APP_ID == 0:
+            config["app_key"] = "1skff241na3x0at"
+        elif APP_ID == 1:
+            config["app_key"] = "oej907ash41pmp2"
 
-        flow = dropbox.DropboxOAuth2FlowNoRedirect(
-            config["app_key"], use_pkce=True, token_access_type="offline"
-        )
-        authorize_url = flow.start()
-        print(("1. Go to: " + authorize_url))
-        print('2. Click "Allow" (you might have to log in first)')
-        print("3. Copy the authorization code.")
-        code = input("Enter the authorization code here: ").strip()
-        result = flow.finish(code)
+        requestNewAuthorization(config)
 
-        config["refresh_token"] = result.refresh_token
         config["dropbox_local_path"] = unix_slash(
             input(
                 "Enter dropbox local path (or press enter for "
@@ -232,12 +253,26 @@ def upload(local_file_path, remote_file_path):
     if os.path.getsize(local_file_path) < int(config["max_file_size"]):
         print("uuu", remote_file_path)
         f = open(local_file_path, "rb")
-        db_client.files_upload(
-            f.read(),
-            remote_file_path,
-            mute=True,
-            mode=dropbox.files.WriteMode("overwrite", None),
-        )
+
+        while True:
+            try:
+                db_client.files_upload(
+                    f.read(),
+                    remote_file_path,
+                    mute=True,
+                    mode=dropbox.files.WriteMode("overwrite", None),
+                )
+                break
+            except dropbox.exceptions.AuthError:
+                # Request new authorization
+                # For some reason, this didn't work, so I had to delete config file and start over, and that somehow
+                # worked even while this did not.
+                type, value, traceback = sys.exc_info()
+                print('\nError uploading file %s: %s' % (local_file_path, value.error))
+                print('Possible authorization error. Please fix in Permissions tab on Dropbox website, then request new authorization below.\n')
+                requestNewAuthorization(config)
+                config.write()
+
         fix_local_time(remote_file_path)
     else:
         note("File above max size, ignoring: " + remote_file_path)
@@ -425,8 +460,8 @@ if sys.platform != "win32":
 else:
     drupebox_cache = add_trailing_slash(path_join(home, ".config"))
 
-drupebox_cache_file_list_path = path_join(drupebox_cache, "drupebox_last_seen_files")
-drupebox_cache_last_state_path = path_join(drupebox_cache, "drupebox_last_state")
+drupebox_cache_file_list_path = path_join(drupebox_cache, APP_NAME + "_last_seen_files")
+drupebox_cache_last_state_path = path_join(drupebox_cache, APP_NAME + "_last_state")
 
 config = get_config()
 

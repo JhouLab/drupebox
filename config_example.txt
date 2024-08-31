@@ -1,0 +1,8 @@
+[options]
+
+
+; Supported APP_IDs:
+; 0 = "drupebox"
+; 1 = "JhouLabMouseVideo"
+; 2 = "drupebox_Home"
+APP_ID = 1
