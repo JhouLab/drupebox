@@ -150,7 +150,7 @@ def get_config_real():
         config["dropbox_local_path"] = add_trailing_slash(config["dropbox_local_path"])
         if not path_exists(config["dropbox_local_path"]):
             os.makedirs(config["dropbox_local_path"])
-        config["max_file_size"] = 10000000
+        config["max_file_size"] = 100000000
         config["excluded_folder_paths"] = [
             "/home/pi/SUPER_SECRET_LOCATION_1/",
             "/home/pi/SUPER SECRET LOCATION 2/",
@@ -250,7 +250,8 @@ def determine_locally_deleted_files(tree_now, tree_last):
 
 
 def upload(local_file_path, remote_file_path):
-    if os.path.getsize(local_file_path) < int(config["max_file_size"]):
+    max_size = int(config["max_file_size"])
+    if os.path.getsize(local_file_path) < max_size:
         print("uuu", remote_file_path)
         f = open(local_file_path, "rb")
 
@@ -275,7 +276,7 @@ def upload(local_file_path, remote_file_path):
 
         fix_local_time(remote_file_path)
     else:
-        note("File above max size, ignoring: " + remote_file_path)
+        note(f"WARNING: File above max size {max_size}, ignoring: " + remote_file_path)
 
 
 def create_remote_folder(remote_file_path):
