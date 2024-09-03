@@ -6,3 +6,5 @@
 ; 1 = "JhouLabMouseVideo"
 ; 2 = "drupebox_Home"
 APP_ID = 1
+
+MAX_FILE_SIZE = 150000000

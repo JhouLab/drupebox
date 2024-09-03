@@ -15,6 +15,7 @@ configFilePath = r'config.txt'
 configParser.read(configFilePath)
 
 APP_ID = configParser.getint('options', 'APP_ID', fallback=0)
+MAX_FILE_SIZE = configParser.getint('options', 'MAX_FILE_SIZE', fallback=10000000)
 
 # App name must be created within Dropbox. Go to: dropbox.com/developers, and follow the directions to create app.
 #
@@ -150,7 +151,7 @@ def get_config_real():
         config["dropbox_local_path"] = add_trailing_slash(config["dropbox_local_path"])
         if not path_exists(config["dropbox_local_path"]):
             os.makedirs(config["dropbox_local_path"])
-        config["max_file_size"] = 100000000
+        config["max_file_size"] = MAX_FILE_SIZE
         config["excluded_folder_paths"] = [
             "/home/pi/SUPER_SECRET_LOCATION_1/",
             "/home/pi/SUPER SECRET LOCATION 2/",
