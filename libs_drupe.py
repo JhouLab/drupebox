@@ -163,6 +163,10 @@ def get_config_real():
 
     # Sanitize config
 
+    if config["max_file_size"] != MAX_FILE_SIZE:
+        config["max_file_size"] = MAX_FILE_SIZE
+        config.write()
+
     # format dropbox local path with forward slashes on all platforms and end with forward slash to ensure prefix-free
     if config["dropbox_local_path"] != add_trailing_slash(config["dropbox_local_path"]):
         config["dropbox_local_path"] = add_trailing_slash(config["dropbox_local_path"])
