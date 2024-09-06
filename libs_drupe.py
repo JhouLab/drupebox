@@ -17,16 +17,22 @@ configParser.read(configFilePath)
 APP_ID = configParser.getint('options', 'APP_ID', fallback=0)
 MAX_FILE_SIZE = configParser.getint('options', 'MAX_FILE_SIZE', fallback=10000000)
 
-# App name must be created within Dropbox. Go to: dropbox.com/developers, and follow the directions to create app.
+# App name must be created within Dropbox. Go to: dropbox.com/developers,
+# click the big blue "Create Apps" button, and follow the directions to create app.
+# Make sure to add the following permissions:
+#    files.content.write
+#    files.content.read
+# These must be added BEFORE linking to the app. If you forget, you will have
+# to recreate the access code.
 #
 if APP_ID == 0:
-    APP_NAME = "drupebox"
+    APP_NAME = "drupebox"   # This is actually the surgery station
 elif APP_ID == 1:
     APP_NAME = "drupebox_JhouLabMouseVideo"
 elif APP_ID == 2:
-    APP_NAME = "drupebox_Home"
+    APP_NAME = "drupebox_JhouLabRunway"
 else:
-    APP_NAME = "default"
+    APP_NAME = "drupebox"   # Default value
 
 print(f'Will sync local folder to remote Dropbox App: {APP_NAME}')
 
@@ -136,6 +142,10 @@ def get_config_real():
             config["app_key"] = "1skff241na3x0at"
         elif APP_ID == 1:
             config["app_key"] = "oej907ash41pmp2"
+        elif APP_ID == 2:
+            config["app_key"] = "hoohalxkvj6s7bj"
+        else:
+            raise Exception(f"No app_key configured for APP_ID {APP_ID}")
 
         requestNewAuthorization(config)
 

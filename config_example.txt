@@ -2,9 +2,9 @@
 
 
 ; Supported APP_IDs:
-; 0 = "drupebox"
-; 1 = "JhouLabMouseVideo"
-; 2 = "drupebox_Home"
+; 0 = "drupebox"   (actually the surgery station)
+; 1 = "drupebox_JhouLabMouseVideo"
+; 2 = "drupebox_JhouLabRunway"
 APP_ID = 1
 
 MAX_FILE_SIZE = 150000000
