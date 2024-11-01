@@ -16,6 +16,16 @@ configParser.read(configFilePath)
 
 APP_ID = configParser.getint('options', 'APP_ID', fallback=0)
 MAX_FILE_SIZE = configParser.getint('options', 'MAX_FILE_SIZE', fallback=10000000)
+MAX_FILE_SIZE = str(MAX_FILE_SIZE)
+
+REALLY_DELETE_LOCAL_FILES = configParser.getint('options', 'REALLY_DELETE_LOCAL_FILES', fallback=0)
+
+# Internal config structure represents everything as string, not int or Boolean
+if REALLY_DELETE_LOCAL_FILES > 0:
+    REALLY_DELETE_LOCAL_FILES = 'True'
+else:
+    REALLY_DELETE_LOCAL_FILES = 'False'
+
 
 # App name must be created within Dropbox. Go to: dropbox.com/developers,
 # click the big blue "Create Apps" button, and follow the directions to create app.
@@ -182,22 +192,31 @@ def get_config_real():
                 "/home/pi/SUPER_SECRET_LOCATION_1/",
                 "/home/pi/SUPER SECRET LOCATION 2/",
             ]
-            config["really_delete_local_files"] = False
+            config["really_delete_local_files"] = REALLY_DELETE_LOCAL_FILES
             config.write()
             break
 
     config = ConfigObj(config_filename)
 
     # Sanitize config
-
+    needWrite = False
+    
     if config["max_file_size"] != MAX_FILE_SIZE:
         config["max_file_size"] = MAX_FILE_SIZE
-        config.write()
+        needWrite = True
+        
+    if config["really_delete_local_files"] != REALLY_DELETE_LOCAL_FILES:
+        config["really_delete_local_files"] = REALLY_DELETE_LOCAL_FILES
+        needWrite = True
 
     # format dropbox local path with forward slashes on all platforms and end with forward slash to ensure prefix-free
     if config["dropbox_local_path"] != add_trailing_slash(config["dropbox_local_path"]):
         config["dropbox_local_path"] = add_trailing_slash(config["dropbox_local_path"])
+        needWrite = True
+        
+    if needWrite:
         config.write()
+        get_config.cache = ""
 
     # format excluded paths with forward slashes on all platforms and end with forward slash to ensure prefix-free
     excluded_folder_paths_sanitize = False

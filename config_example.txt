@@ -11,3 +11,8 @@ APP_ID = 1
 
 ; Max size in bytes = 150MB
 MAX_FILE_SIZE = 150000000
+
+; If 1, then allow deletion of local files when remote is deleted. Otherwise,
+; will refuse to delete local file, and in fact will re-upload to remote, which is
+; kind of annoying.
+REALLY_DELETE_LOCAL_FILES = 1
