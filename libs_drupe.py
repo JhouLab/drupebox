@@ -3,7 +3,7 @@
 import os
 import sys
 import time
-import dropbox
+import dropbox   # Install this with pip install dropbox
 from send2trash import send2trash
 from datetime import datetime, timezone
 from configobj import ConfigObj
@@ -31,6 +31,8 @@ elif APP_ID == 1:
     APP_NAME = "drupebox_JhouLabMouseVideo"
 elif APP_ID == 2:
     APP_NAME = "drupebox_JhouLabRunway"
+elif APP_ID == 3:
+    APP_NAME = "drupebox_JhouLabPictureFrame"
 else:
     APP_NAME = "drupebox"   # Default value
 
@@ -118,6 +120,7 @@ def requestNewAuthorization(config):
         config["app_key"], use_pkce=True, token_access_type="offline"
     )
     authorize_url = flow.start()
+    print("Please follow the following steps:")
     print(("1. Go to: " + authorize_url))
     print('2. Click "Allow" (you might have to log in first)')
     print("3. Copy the authorization code.")
@@ -137,6 +140,10 @@ def get_config_real():
         config.filename = config_filename
 
         # To customise this code, change the app key below
+        # To create new app key, go to dropbox.com/developers, then click "Create Apps",
+        # then "Scoped access", then "App folder", then enter a name.
+        # After that, go to "permissions", check "file.contents.write" and
+        # "file.contents.read", then "Submit"
         # Get your app key from the Dropbox developer website for your app
         if APP_ID == 0:
             config["app_key"] = "1skff241na3x0at"
@@ -144,30 +151,40 @@ def get_config_real():
             config["app_key"] = "oej907ash41pmp2"
         elif APP_ID == 2:
             config["app_key"] = "hoohalxkvj6s7bj"
+        elif APP_ID == 3:
+            config["app_key"] = "nski4uxt2scbj0b"
         else:
-            raise Exception(f"No app_key configured for APP_ID {APP_ID}")
+            raise Exception(f"No app_key configured for APP_ID {APP_ID}.\nPlease go to dropbox.com/developers and create a new app key.")
 
         requestNewAuthorization(config)
-
-        config["dropbox_local_path"] = unix_slash(
-            input(
+        
+        while True:
+            localPath = input(
                 "Enter dropbox local path (or press enter for "
                 + path_join(home, "Dropbox")
                 + "/) "
             ).strip()
-        )
-        if config["dropbox_local_path"] == "":
-            config["dropbox_local_path"] = path_join(home, "Dropbox")
-        config["dropbox_local_path"] = add_trailing_slash(config["dropbox_local_path"])
-        if not path_exists(config["dropbox_local_path"]):
-            os.makedirs(config["dropbox_local_path"])
-        config["max_file_size"] = MAX_FILE_SIZE
-        config["excluded_folder_paths"] = [
-            "/home/pi/SUPER_SECRET_LOCATION_1/",
-            "/home/pi/SUPER SECRET LOCATION 2/",
-        ]
-        config["really_delete_local_files"] = False
-        config.write()
+
+            config["dropbox_local_path"] = unix_slash(localPath)
+            if config["dropbox_local_path"] == "":
+                config["dropbox_local_path"] = path_join(home, "Dropbox")
+            config["dropbox_local_path"] = add_trailing_slash(config["dropbox_local_path"])
+            
+            try:
+                if not path_exists(config["dropbox_local_path"]):
+                    os.makedirs(config["dropbox_local_path"])
+            except Exception as ex:
+                print("Error: ", ex.__class__.__name__)
+                print("Unable to create local path. Please try again.")
+                
+            config["max_file_size"] = MAX_FILE_SIZE
+            config["excluded_folder_paths"] = [
+                "/home/pi/SUPER_SECRET_LOCATION_1/",
+                "/home/pi/SUPER SECRET LOCATION 2/",
+            ]
+            config["really_delete_local_files"] = False
+            config.write()
+            break
 
     config = ConfigObj(config_filename)
 

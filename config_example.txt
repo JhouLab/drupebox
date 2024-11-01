@@ -1,3 +1,4 @@
+; Save this file as "config.txt", then edit for your needs
 [options]
 
 
@@ -5,6 +6,8 @@
 ; 0 = "drupebox"   (actually the surgery station)
 ; 1 = "drupebox_JhouLabMouseVideo"
 ; 2 = "drupebox_JhouLabRunway"
+; 3 = "drupebox_JhouLabPictureFrame"
 APP_ID = 1
 
+; Max size in bytes = 150MB
 MAX_FILE_SIZE = 150000000
