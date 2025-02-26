@@ -355,7 +355,7 @@ def download_file(remote_file_path, local_file_path):
 
 def local_delete(local_file_path):
     remote_file_path = get_remote_file_path_of_local_file_path(local_file_path)
-    if config_ok_to_delete():  # safety check that should be impossible to get to
+    if config_ok_to_delete():  # safety check that should be impossible to get to since we already checked it
         print("!!!", remote_file_path)
         send2trash(system_slash(local_file_path))
 
@@ -364,7 +364,7 @@ def remote_delete(local_file_path):
     remote_file_path = get_remote_file_path_of_local_file_path(local_file_path)
     print("!!!", remote_file_path)
     try:
-        db_client.files_delete(remote_file_path)
+        db_client.files_delete_v2(remote_file_path)  # files_delete was deprecated, _v2 is updated version
     except:
         note("Tried to delete file on dropbox, but it was not there")
 

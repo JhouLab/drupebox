@@ -72,7 +72,7 @@ def action_folder(remote_folder_path):
         if local_item_not_found_at_remote(remote_folder, remote_file_path):
             if (
                 time_from_last_run > local_modified_time(local_file_path)
-                and time_from_last_run > time.time() - 60 * 60 * 2
+#                and time_from_last_run > time.time() - 60 * 60 * 2  # Last run was within 2 hours. Why do this check?
                 and remote_file_path in remotely_deleted_files
                 and config_ok_to_delete()
             ):
